@@ -2,6 +2,8 @@
 
 DL+DiReCT combines a deep learning-based neuroanatomy segmentation and cortex parcellation with a diffeomorphic registration technique to measure cortical thickness from T1w MRI.
 
+![Abstract](doc/abstract.png)
+
 If you are using DL+DiReCT in your research, please cite ([bibtex](doc/cite.bib)) the corresponding [publication](https://doi.org/10.1002/hbm.25159):
 ```
 Rebsamen, M, Rummel, C, Reyes, M, Wiest, R, McKinley, R.
