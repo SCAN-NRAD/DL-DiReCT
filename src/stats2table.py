@@ -24,7 +24,7 @@ def write_results(df, pattern, dst, suffix=''):
     df_subset = df.filter(regex=pattern, axis=1)
     # rename to match FS convention (lh- --> lh_ and add _suffix)
     df_subset = df_subset.rename(columns=lambda x: re.sub('(lh|rh)-', r'\1_',x) + (suffix if not x.startswith('SUBJECT') else ''))
-    df_subset.to_csv(dst, sep='\t', index=False)
+    df_subset.to_csv(dst, sep='\t', na_rep='NaN', index=False)
     
 
 if __name__ == '__main__':
