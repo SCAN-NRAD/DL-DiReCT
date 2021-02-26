@@ -6,7 +6,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='DL+DiReCT',
-    version='0.9.0',
+    version='0.9.1',
     description='DL+DiReCT - Direct Cortical Thickness Estimation using Deep Learning-based Anatomy Segmentation and Cortex Parcellation',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -26,6 +26,7 @@ setup(
                       'nibabel==3.2.1',
                       'numpy==1.17.4',
                       'pandas==0.25.3',
+                      'pyradiomics==3.0.1',
                       'scikit-learn==0.21.3',
                       'scikit-image==0.16.2',
                       'scipy==1.3.3',
