@@ -2,11 +2,12 @@
 
 usage() {
 cat << EOF
-Usage: dl+direct [OPTION]... T1_FILE OUTPUT_DIR
-Process T1_FILE (.nii.gz) with dl+direct and put results into OUTPUT_DIR.
+Usage: dl+direct [-h] [-s subject] [-b] [-n] [-m model_file] [-k] T1_FILE OUTPUT_DIR
+Process T1_FILE (nifti) with dl+direct and put results into OUTPUT_DIR.
 Input is expected to be a skull-stripped T1w MRI. You may specify --bet to remove
 the skull (using hd-bet).
 
+optional arguments:
 	-h|--help	show this usage
 	-s|--subject	subject-id (written to .csv results)
 	-b|--bet	Skull-stripping using hd-bet
@@ -81,16 +82,19 @@ echo
 python ${SCRIPT_DIR}/conform.py ${T1} ${DST}/T1w_norm.nii.gz
 
 HAS_GPU=`python -c 'import torch; print(torch.cuda.is_available())'`
-BET_OPTS=""
 if [ ${HAS_GPU} != 'True' ] ; then
-	echo "Warning: No GPU/CUDA device found. Running on CPU might take some time... (running hd-bet in fast mode, check results!)"
-	BET_OPTS=" -device cpu -mode fast -tta 0 "
+	echo "WARNING: No GPU/CUDA device found. Running on CPU might take some time..."
 fi
 
 
 # Skull-stripping
 if [ ${DO_SKULLSTRIP} -gt 0 ] ; then
 	# skull-strip using HD-BET
+	BET_OPTS=""
+	if [ ${HAS_GPU} != 'True' ] ; then
+		echo "Running hd-bet in fast mode, check results! Make sure you have enough memory."
+		BET_OPTS=" -device cpu -mode fast -tta 0 "
+	fi
 	hd-bet -i ${DST}/T1w_norm.nii.gz -o ${DST}/T1w_norm_noskull.nii.gz ${BET_OPTS} || die "hd-bet failed"
 	IN_VOLUME=${DST}/T1w_norm_noskull.nii.gz
 	MASK_VOLUME=${DST}/T1w_norm_noskull_mask.nii.gz

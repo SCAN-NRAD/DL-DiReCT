@@ -16,7 +16,7 @@ Human brain mapping. 2020; 41: 4804-4814. https://doi.org/10.1002/hbm.25159
 ## Create virtual environment (optional)
 Download and install [Miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html) and create a new conda environment:
 ```bash
-conda create -n DL_DiReCT python=3.7
+conda create -y -n DL_DiReCT python=3.7
 source activate DL_DiReCT
 ```
 
@@ -32,7 +32,7 @@ If you want to use [HD-BET](https://github.com/NeuroAI-HD/HD-BET/) for skull-str
 ```bash
 cd ${HOME}
 wget https://github.com/NeuroAI-HD/HD-BET/archive/master.zip
-unzip master.zip
+unzip master.zip && rm master.zip
 cd HD-BET-master
 pip install -e .
 ```
