@@ -53,3 +53,6 @@ Following files of interest are generated in the output directory:
 - result-thick.csv		ROI-wise mean cortical thickness
 - result-thickstd.csv		ROI-wise standard deviations of cortical thickness
 ```
+
+# [Frequently Asked Questions](doc/faq.md)
+For further details, consult the corresponding [publication](https://doi.org/10.1002/hbm.25159) and the [FAQ](doc/faq.md) or [contact us](http://www.scancore.org/index.php/research/imageanalytics)

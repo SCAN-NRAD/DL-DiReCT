@@ -2,18 +2,19 @@
 
 usage() {
 cat << EOF
-Usage: dl+direct [-h] [-s subject] [-b] [-n] [-m model_file] [-k] T1_FILE OUTPUT_DIR
+Usage: dl+direct [-h] [-s subject] [-b [-i inv2_file]] [-n] [-m model_file] [-k] T1_FILE OUTPUT_DIR
 Process T1_FILE (nifti) with dl+direct and put results into OUTPUT_DIR.
 Input is expected to be a skull-stripped T1w MRI. You may specify --bet to remove
 the skull (using hd-bet).
 
 optional arguments:
-	-h|--help	show this usage
-	-s|--subject	subject-id (written to .csv results)
-	-b|--bet	Skull-stripping using hd-bet
-	-n|--no-cth	Skip cortical thickness (DiReCT), just perform segmentation	
-	-m|--model	Use given trained model
-	-k|--keep	Keep intermediate files
+	-h|--help		show this usage
+	-s|--subject		subject-id (written to .csv results)
+	-b|--bet		Skull-stripping using hd-bet
+	-i|--mp2rage-inv2	Use given 2nd inversion recovery image from an MP2Rage to generate brain mask
+	-n|--no-cth		Skip cortical thickness (DiReCT), just perform segmentation	
+	-m|--model		Use given trained model
+	-k|--keep		Keep intermediate files
 	
 EOF
 	exit 0
@@ -35,6 +36,7 @@ DO_SKULLSTRIP=0
 DO_CT=1
 KEEP_INTERMEDIATE=0
 MODEL_ARGS=""
+MP2RAGE_INV2=""
 if [ -z "${ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS}" ] ; then
 	# number of threads for DiReCT
 	export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=4
@@ -47,6 +49,7 @@ while [[ $# -gt 0 ]]; do
 		-h|--help)	usage 0;;
 		-s|--subject)	shift; SUBJECT_ID="$1" ;;
 		-b|--bet)	DO_SKULLSTRIP=1 ;;
+		-i|--mp2rage-inv2)	shift; MP2RAGE_INV2=$1 ;;
 		-n|--no-cth)	DO_CT=0 ;;
 		-m|--model)	shift; MODEL_ARGS="--model $1" ;;
 		-k|--keep)	KEEP_INTERMEDIATE=1 ;;
@@ -91,13 +94,17 @@ fi
 if [ ${DO_SKULLSTRIP} -gt 0 ] ; then
 	# skull-strip using HD-BET
 	BET_OPTS=""
-	if [ ${HAS_GPU} != 'True' ] ; then
-		echo "Running hd-bet in fast mode, check results! Make sure you have enough memory."
-		BET_OPTS=" -device cpu -mode fast -tta 0 "
+	if [ "${MP2RAGE_INV2}x" != "x" ] ; then
+		echo "Using ${MP2RAGE_INV2} to create brain mask"
+		BET_INPUT_VOLUME=${DST}/T1w_mp2rage_INV2_norm.nii.gz
+		BET_OPTS=" --mp2rage-inv2 ${BET_INPUT_VOLUME}"
+		python ${SCRIPT_DIR}/conform.py ${MP2RAGE_INV2} ${BET_INPUT_VOLUME}
 	fi
-	hd-bet -i ${DST}/T1w_norm.nii.gz -o ${DST}/T1w_norm_noskull.nii.gz ${BET_OPTS} || die "hd-bet failed"
 	IN_VOLUME=${DST}/T1w_norm_noskull.nii.gz
+	BET_INPUT_VOLUME=${DST}/T1w_norm.nii.gz
 	MASK_VOLUME=${DST}/T1w_norm_noskull_mask.nii.gz
+	
+	python ${SCRIPT_DIR}/bet.py ${BET_OPTS} ${BET_INPUT_VOLUME} ${IN_VOLUME} || die "hd-bet failed"
 else
 	# Assume input is already skull-stripped
 	IN_VOLUME=${DST}/T1w_norm.nii.gz
