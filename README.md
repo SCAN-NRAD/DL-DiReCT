@@ -4,7 +4,7 @@ DL+DiReCT combines a deep learning-based neuroanatomy segmentation and cortex pa
 
 ![Abstract](doc/abstract.png)
 
-If you are using DL+DiReCT in your research, please cite ([bibtex](doc/cite.bib)) the corresponding [publication](https://doi.org/10.1002/hbm.25159):
+If you are using DL+DiReCT in your research, please cite ([bibtex](citations.bib)) the corresponding [publication](https://doi.org/10.1002/hbm.25159):
 ```
 Rebsamen, M, Rummel, C, Reyes, M, Wiest, R, McKinley, R.
 Direct cortical thickness estimation using deep learning‐based anatomy segmentation and cortex parcellation.

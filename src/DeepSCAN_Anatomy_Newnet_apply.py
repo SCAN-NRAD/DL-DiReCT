@@ -28,12 +28,6 @@ SAVE_LOGITS_FILTER = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter
                       'cortex_l', 'cortex_r', 'Left-Cerebral-Cortex', 'Right-Cerebral-Cortex',
                       'Left-Amygdala', 'Right-Amygdala', 'Left-Hippocampus', 'Right-Hippocampus']
 
-# label definition: DeepSCAN_labels_aseg.py
-# this will also set NUM_IGNORE_LABELS: number of last labels to ignore for hard segmentation (argmax), e.g. left-hemi, right-hemi, brain
-#from DeepSCAN_labels_aseg import *
-from DeepSCAN_labels_aseg_aparc import *
-assert len(target_label_names) == len(target_label_sets)
-
 
 stack_depth = 7
 BATCH_SIZE = 10
@@ -41,23 +35,27 @@ VERBOSE = True
 DIM = 216
 SCRIPT_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-# To generate the hard segmentations, we use the FS labels where we have a 1:1 correspondence,
-# otherwise a label above 100 (not used in FS)
-LUT = dict()
-with open('{}/fs_lut.csv'.format(SCRIPT_DIR), 'r') as file:
-    csv_reader = csv.reader(file, delimiter=',')
-    next(csv_reader, None)  # skip the headers
-    for row in csv_reader:
-        LUT[row[1]] = int(row[0])
+
+def get_label_def(label_names):
+    # To generate the hard segmentations, we use the FS labels where we have a 1:1 correspondence,
+    # otherwise a label above 100 (not used in FS)
+    LUT = dict()
+    with open('{}/fs_lut.csv'.format(SCRIPT_DIR), 'r') as file:
+        csv_reader = csv.reader(file, delimiter=',')
+        next(csv_reader, None)  # skip the headers
+        for row in csv_reader:
+            LUT[row[1]] = int(row[0])
+            
+    LABELS = dict()
+    for idx, label in enumerate(label_names):
+        if label in LUT:
+            l = LUT[label]
+        else:
+            l = idx + 100
         
-LABELS = dict()
-for idx, label in enumerate(target_label_names):
-    if label in LUT:
-        l = LUT[label]
-    else:
-        l = idx + 100
-    
-    LABELS[label] = l
+        LABELS[label] = l
+        
+    return LABELS
     
 
 def get_stack(axis, volume, central_slice, first_slice=None, last_slice=None,
@@ -375,15 +373,13 @@ def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0
     return np.mean(np.array(ensemble_logits),axis=0)
 
 
-def load_checkpoint(net, checkpoint_file, device):
+def load_checkpoint(checkpoint_file, device):
     if not os.path.exists(checkpoint_file):
         print('Error: model {} not found'.format(checkpoint_file))
         sys.exit(1)
         
     print('loading checkpoint {}'.format(checkpoint_file)) if VERBOSE else False
-    checkpoint = torch.load(checkpoint_file, map_location=device)
-    net.load_state_dict(checkpoint['state_dict'])
-                
+    return torch.load(checkpoint_file, map_location=device)
 
 
 if __name__ == '__main__':
@@ -407,9 +403,14 @@ if __name__ == '__main__':
         os.makedirs(output_dir)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    unet = UNET_3D_to_2D(0,channels_in=1,channels=64, growth_rate=16, dilated_layers=[4,4,4,4], output_channels=len(target_label_names))
-    unet.to(device)
-    load_checkpoint(unet, model_file, device)
+    checkpoint = load_checkpoint(model_file, device)
+    target_label_names = checkpoint['label_names']
+    # number of last labels to ignore for hard segmentation (argmax), e.g. left-hemi, right-hemi, brain
+    NUM_IGNORE_LABELS = checkpoint['label_num_ignore']
+    LABELS = get_label_def(target_label_names)
+    
+    unet = UNET_3D_to_2D(0,channels_in=1,channels=64, growth_rate=16, dilated_layers=[4,4,4,4], output_channels=len(target_label_names)).to(device)
+    unet.load_state_dict(checkpoint['state_dict'])
     unet.eval()
 
     t1 = nib.load(t1_file)
@@ -442,7 +443,7 @@ if __name__ == '__main__':
     nib.save(nib.Nifti1Image(segmentation_sm_fslabels.astype(np.int32), affine), '{}/softmax_seg.nii.gz'.format(output_dir))
     
     # save individual logits for each class
-    for idx, x in enumerate(target_label_sets):
+    for idx, x in enumerate(target_label_names):
         lbl_name = target_label_names[idx]
         if not SAVE_LOGITS_FILTER or lbl_name in SAVE_LOGITS_FILTER:
             nib.save(nib.Nifti1Image(logit[idx, :, :, :], affine), '{}/seg_{}.nii.gz'.format(output_dir, lbl_name))

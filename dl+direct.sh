@@ -26,7 +26,7 @@ invalid() {
 }
 
 die() {
-	echo "$1"
+	echo "ERROR: $1"
 	exit 1
 }
 
