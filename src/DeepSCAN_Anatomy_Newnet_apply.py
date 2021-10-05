@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import csv
+import pandas as pd
 import nibabel as nib
 from collections import OrderedDict
 import torch
@@ -448,8 +449,11 @@ if __name__ == '__main__':
         if not SAVE_LOGITS_FILTER or lbl_name in SAVE_LOGITS_FILTER:
             nib.save(nib.Nifti1Image(logit[idx, :, :, :], affine), '{}/seg_{}.nii.gz'.format(output_dir, lbl_name))
 
-    with open('{}/deepscan_volumes.csv'.format(output_dir), 'w') as file:
+    with open('{}/result-vol.csv'.format(output_dir), 'w') as file:
         writer = csv.writer(file, delimiter=',')
         writer.writerow(['SUBJECT'] + ['{}'.format(target_label_names[idx]) for idx in range(0, len(target_label_names)-NUM_IGNORE_LABELS)])
         writer.writerow([subject_id] + ['{}'.format(i) for i in volumes])
+        
+    # write label definitions
+    pd.DataFrame([[LABELS[lbl], lbl] for lbl in LABELS], columns=['ID', 'LABEL']).to_csv('{}/label_def.csv'.format(output_dir), sep=',', index=False)
 

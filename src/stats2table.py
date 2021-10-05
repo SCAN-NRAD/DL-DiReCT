@@ -46,7 +46,7 @@ if __name__ == '__main__':
     if not os.path.exists(args.destination):
         os.makedirs(args.destination, exist_ok=True)
     
-    volumes = collect_stats(args.subjects_dir, 'deepscan_volumes.csv')
+    volumes = collect_stats(args.subjects_dir, 'result-vol.csv')
     if volumes is not None:
         write_results(volumes, REGEX_LH, '{}/lh.aparc_stats_volume.txt'.format(args.destination), '_volume')
         write_results(volumes, REGEX_RH, '{}/rh.aparc_stats_volume.txt'.format(args.destination), '_volume')
