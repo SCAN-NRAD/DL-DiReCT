@@ -33,7 +33,8 @@ setup(
                       'sortedcontainers==2.1.0',
                       'torch==1.3.1'],
 
-    scripts=['dl+direct', 'direct'],
+    entry_points={'console_scripts': ['dl+direct=run_script:dl_direct', 'direct=run_script:direct',
+                                      'stats2table=stats2table:main', 'radiomics_extractor=radiomics_extractor:main']},
     project_urls={  # Optional
         #'Bug Reports': 'https://github.com/SCAN-NRAD/DL-DiReCT/issues',
         'Source': 'https://github.com/SCAN-NRAD/DL-DiReCT',

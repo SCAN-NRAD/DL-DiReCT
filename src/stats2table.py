@@ -14,7 +14,7 @@ def collect_stats(directory, filename):
     df = None
     for f in sorted(glob.glob('{}/*/{}'.format(directory, filename))):
         df_subj = pd.read_csv(f, dtype=str)
-        df = df_subj if df is None else df.append(df_subj)
+        df = df_subj if df is None else df.append(df_subj, ignore_index=True, sort=False)
         
     return df
 
@@ -27,7 +27,7 @@ def write_results(df, pattern, dst, suffix=''):
     df_subset.to_csv(dst, sep='\t', na_rep='NaN', index=False)
     
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Collect results from processed subjects and generate FreeSurfer alike stats2table files.')
 
     parser.add_argument(
@@ -67,4 +67,7 @@ if __name__ == '__main__':
     if thickstd is not None:
         write_results(thickstd, REGEX_LH, '{}/lh.aparc_stats_thicknessstd.txt'.format(args.destination), '_thicknessstd')
         write_results(thickstd, REGEX_RH, '{}/rh.aparc_stats_thicknessstd.txt'.format(args.destination), '_thicknessstd')
-    
+
+
+if __name__ == '__main__':
+    sys.exit(main())

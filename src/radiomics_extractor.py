@@ -25,14 +25,14 @@ def lut_parse():
     return lut
 
 
-def main(subject_dirs, aseg_file, labels, results_csv):
+def run_main(subject_dirs, aseg_file, labels, results_csv):
     LUT = lut_parse()
     print(results_csv)
     with open(results_csv, 'w') as out_file:
         writer = csv.writer(out_file, delimiter=',')
         header = None
         for subjects_dir in subject_dirs:
-            for subject_name in os.listdir(subjects_dir):
+            for subject_name in sorted(os.listdir(subjects_dir)):
                 fname = '{}/{}/{}'.format(subjects_dir, subject_name, aseg_file)
                 if not os.path.exists(fname):
                     print('{}: {} not found. Skipping'.format(subject_name, aseg_file))
@@ -64,7 +64,7 @@ def main(subject_dirs, aseg_file, labels, results_csv):
                 writer.writerow([subject_name] + values)
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Extract radiomics features from subjects')
 
     parser.add_argument(
@@ -107,4 +107,8 @@ if __name__ == '__main__':
             sys.exit(1)
 
     labels = LABELS_FS if args.labels[0] == 'FS' else LABELS_DL if args.labels[0] == 'DL' else args.labels
-    main(args.subject_dirs, args.aseg_file, labels, args.results_csv)
+    run_main(args.subject_dirs, args.aseg_file, labels, args.results_csv)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

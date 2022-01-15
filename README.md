@@ -49,10 +49,12 @@ Following files of interest are generated in the output directory:
 - T1w_norm.nii.gz		Re-sampled input volume
 - T1w_norm_seg.nii.gz		Segmentation
 - T1w_norm_thickmap.nii.gz	Thickness map
-- deepscan_volumes.csv		Segmentation volumes
+- result-vol.csv		Segmentation volumes
 - result-thick.csv		ROI-wise mean cortical thickness
 - result-thickstd.csv		ROI-wise standard deviations of cortical thickness
 ```
+
+Results may be collected into FreeSurfer alike statistics files with ```stats2table```.
 
 # [Frequently Asked Questions](doc/faq.md)
 For further details, consult the corresponding [publication](https://doi.org/10.1002/hbm.25159) and the [FAQ](doc/faq.md) or [contact us](http://www.scancore.org/index.php/research/imageanalytics)
