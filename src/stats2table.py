@@ -1,5 +1,6 @@
 import pandas as pd
 import argparse
+import sys
 import glob
 import os
 import re
@@ -14,7 +15,7 @@ def collect_stats(directory, filename):
     df = None
     for f in sorted(glob.glob('{}/*/{}'.format(directory, filename))):
         df_subj = pd.read_csv(f, dtype=str)
-        df = df_subj if df is None else df.append(df_subj, ignore_index=True, sort=False)
+        df = df_subj if df is None else pd.concat([df, df_subj], ignore_index=True, sort=False)
         
     return df
 
