@@ -374,6 +374,17 @@ def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0
     return np.mean(np.array(ensemble_logits),axis=0)
 
 
+def locate_model(model_file):
+    if os.path.exists(model_file):
+        return model_file
+    
+    for prefix in ['', '{}/../model/'.format(SCRIPT_DIR)]:
+        for suffix in ['.pth', '_f1.pth']:
+            file = '{}{}{}'.format(prefix, model_file, suffix)
+            if os.path.exists(file):
+                return file
+    
+        
 def load_checkpoint(checkpoint_file, device):
     if not os.path.exists(checkpoint_file):
         print('Error: model {} not found'.format(checkpoint_file))
@@ -385,7 +396,7 @@ def load_checkpoint(checkpoint_file, device):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DeepSCAN: Deep learning based anatomy segmentation and cortex parcellation')
-    parser.add_argument("--model", required=False)
+    parser.add_argument("--model", required=False, default='v0_f1')
     parser.add_argument("T1w")
     parser.add_argument("destination_dir")
     parser.add_argument("subject_id")
@@ -393,7 +404,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     t1_file = args.T1w
     output_dir = args.destination_dir
-    model_file = args.model if args.model else '{}/../model/checkpoint_f1.pth.tar'.format(SCRIPT_DIR)
+    model_file = locate_model(args.model)
     subject_id = args.subject_id
     
     if not os.path.exists(t1_file):
