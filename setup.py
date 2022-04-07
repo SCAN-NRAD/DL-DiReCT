@@ -32,7 +32,7 @@ setup(
                       'torch>=1.3.1'],
 
     entry_points={'console_scripts': ['dl+direct=run_script:run', 'direct=run_script:run',
-                                      'stats2table=stats2table:main', 'radiomics_extractor=radiomics_extractor:main']},
+                                      'stats2table=stats2table:main', 'radiomics_extractor=radiomics_extractor:main', 'radiomics2table=radiomics2table:main']},
     project_urls={  # Optional
         #'Bug Reports': 'https://github.com/SCAN-NRAD/DL-DiReCT/issues',
         'Source': 'https://github.com/SCAN-NRAD/DL-DiReCT',

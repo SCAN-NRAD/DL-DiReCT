@@ -5,7 +5,7 @@ import os
 import re
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Generate FreeSurfer alike stats2table files from radiomics.csv (see radiomics_extractor).')
     
     parser.add_argument(
@@ -41,4 +41,7 @@ if __name__ == '__main__':
         df_subset = df.filter(regex='Subject|.*\\.{}$'.format(feature))
         df_subset = df_subset.rename(columns=lambda x: re.sub('\.', '_',x))
         df_subset.to_csv('{}/{}{}.txt'.format(args.destination, args.file_prefix, feature), sep='\t', na_rep='NaN', index=False)
-        
+
+
+if __name__ == '__main__':
+    sys.exit(main())

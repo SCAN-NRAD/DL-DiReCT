@@ -13,3 +13,11 @@ In principal yes, DL+DiReCT should work fine on a (brain extracted) MP2RAGE sequ
 ```
 
 __Note__: A de-noised image can also be calculated by multiplying the unified image with the 2<sup>nd</sup> inversion recovery ([Fujimoto et al., 2014](https://doi.org/10.1016/j.neuroimage.2013.12.012)). This alternative (```bet.py --mp2rage-inv2x```) might work for other brain extraction algorithms but seems not optimal for HD-BET. Visual inspection of the brain mask is recommended. DL+DiReCT should be run on the original (unified) image with the brain mask applied and not on the de-noised version.
+
+
+## How to extract radiomics shape features?
+You may derive radiomics shape features of subcortical structures from the segmentations (see [Rebsamen et al., 2022](https://doi.org/10.3389/fneur.2022.812432)). Given results in the directory ```<output_dir>```, run:
+
+```bash
+radiomics_extractor --results_csv dl_radiomics.csv <output_dir>
+```

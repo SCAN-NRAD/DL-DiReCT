@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import pathlib
 import radiomics
 import SimpleITK as sitk
 import csv
@@ -20,7 +21,7 @@ LABELS_DL = ['Left-Ventricle-all:101', 'Left-Thalamus-Proper', 'Left-Caudate', '
 
 
 def lut_parse():
-    lut = pd.read_csv('{}/fs_lut.csv'.format(os.path.dirname(os.path.realpath(sys.argv[0]))))
+    lut = pd.read_csv('{}/fs_lut.csv'.format(pathlib.Path(__file__).parent.resolve()))
     lut =  dict(zip(lut.Key, lut.Label))
     return lut
 
@@ -103,7 +104,7 @@ def main():
     args = parser.parse_args()
     for dir in args.subject_dirs:
         if not os.path.exists(dir):
-            print('{} not found'.format(args.subjects_dir))
+            print('{} not found'.format(args.dir))
             sys.exit(1)
 
     labels = LABELS_FS if args.labels[0] == 'FS' else LABELS_DL if args.labels[0] == 'DL' else args.labels
