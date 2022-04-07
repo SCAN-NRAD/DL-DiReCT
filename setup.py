@@ -21,7 +21,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     python_requires='>=3.7',
-    install_requires=['antspyx==0.2.4',
+    install_requires=['antspyx==0.3.2',
                       'nibabel>=3.2.1',
                       'numpy>=1.17.4',
                       'pandas>=0.25.3',
