@@ -28,18 +28,8 @@ cd DL-DiReCT
 pip install -e .
 ```
 
-## Install HD-BET for skull-stripping (optional)
-If you want to use [HD-BET](https://github.com/NeuroAI-HD/HD-BET/) for skull-stripping, you may optionally install it with:
-```bash
-cd ${HOME}
-wget https://github.com/NeuroAI-HD/HD-BET/archive/master.zip
-unzip master.zip && rm master.zip
-cd HD-BET-master
-pip install -e .
-```
-
 # Usage
-Run dl+direct on a T1-weighted MRI including skull-stripping (--bet) with:
+Run dl+direct on a T1-weighted MRI including skull-stripping (--bet) using [HD-BET](https://github.com/MIC-DKFZ/HD-BET/) with:
 ```bash
 source activate DL_DiReCT
 dl+direct --subject <your_subj_id> --bet <path_to_t1_input.nii.gz> <output_dir>
@@ -53,6 +43,7 @@ Following files of interest are generated in the output directory:
 - result-vol.csv		Segmentation volumes
 - result-thick.csv		ROI-wise mean cortical thickness
 - result-thickstd.csv		ROI-wise standard deviations of cortical thickness
+- label_def.csv			Label definitions of the segmentation
 ```
 
 Results may be collected into FreeSurfer alike statistics files with ```stats2table```.

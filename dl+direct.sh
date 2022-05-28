@@ -72,7 +72,7 @@ SCRIPT_DIR=`dirname $0`/src
 
 # check prerequisites
 [[ -f ${T1} ]] || die "Invalid input volume: ${T1} not found"
-[[ ${DO_SKULLSTRIP} -eq 0 ]] || [[ "`which hd-bet`X" != "X" ]] || die "hd-bet not found. Install it from https://github.com/NeuroAI-HD/HD-BET"
+[[ ${DO_SKULLSTRIP} -eq 0 ]] || [[ "`which hd-bet`X" != "X" ]] || die "hd-bet not found. Install it from https://github.com/MIC-DKFZ/HD-BET"
 
 mkdir -p ${DST} || die "Could not create target directory ${DST}"
 
