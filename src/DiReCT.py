@@ -26,10 +26,8 @@ if __name__ == '__main__':
     if not os.path.exists(dst):
         os.makedirs(dst)
     
-    # support both old and new DeepScan models
-    cortex_labels = ['cortex_l', 'cortex_r'] if os.path.exists('{}/seg_cortex_l.nii.gz'.format(src)) else ['Left-Cerebral-Cortex', 'Right-Cerebral-Cortex']
-    GM_labels = cortex_labels + ['Left-Amygdala', 'Right-Amygdala', 'Left-Hippocampus', 'Right-Hippocampus']
-    WM_labels = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter']
+    GM_labels = ['Left-Cerebral-Cortex', 'Right-Cerebral-Cortex', 'Left-Amygdala', 'Right-Amygdala', 'Left-Hippocampus', 'Right-Hippocampus']
+    WM_labels = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter'] + (['WM-hypointensities'] if os.path.exists('{}/seg_WM-hypointensities.nii.gz'.format(src)) else [])
     
     # to get affine
     ref_img = nib.load('{}/seg_{}.nii.gz'.format(src, WM_labels[0]))
@@ -43,7 +41,7 @@ if __name__ == '__main__':
     gm_logit = np.max(gm_logit_all, axis=0)
     wm_logit = np.max(wm_logit_all, axis=0)
     
-    #handle background correctly (must remain zero!!)
+    # handle background correctly (must remain zero!!)
     gm_prob = np.where(gm_logit == 0, 0, scipy_special.expit(gm_logit))
     wm_prob = np.where(wm_logit == 0, 0, scipy_special.expit(wm_logit))
     

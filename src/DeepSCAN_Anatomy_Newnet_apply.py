@@ -22,11 +22,11 @@ from numpy import require
 # Set to empty list to disable save of logits:
 #    SAVE_LOGITS_FILTER = []
 # Set to list of selected labels otherwise (e.g. for DL+DiReCT):
-#    SAVE_LOGITS_FILTER = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter',
-#                          'cortex_l', 'cortex_r', 'Left-Cerebral-Cortex', 'Right-Cerebral-Cortex',
+#    SAVE_LOGITS_FILTER = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter', 'WM-hypointensities',
+#                          'Left-Cerebral-Cortex', 'Right-Cerebral-Cortex',
 #                          'Left-Amygdala', 'Right-Amygdala', 'Left-Hippocampus', 'Right-Hippocampus']
-SAVE_LOGITS_FILTER = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter',
-                      'cortex_l', 'cortex_r', 'Left-Cerebral-Cortex', 'Right-Cerebral-Cortex',
+SAVE_LOGITS_FILTER = ['Left-Cerebral-White-Matter', 'Right-Cerebral-White-Matter', 'WM-hypointensities',
+                      'Left-Cerebral-Cortex', 'Right-Cerebral-Cortex',
                       'Left-Amygdala', 'Right-Amygdala', 'Left-Hippocampus', 'Right-Hippocampus']
 
 
