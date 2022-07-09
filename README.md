@@ -48,5 +48,8 @@ Following files of interest are generated in the output directory:
 
 Results may be collected into FreeSurfer alike statistics files with ```stats2table```.
 
+## Contrast-enhanced (CE) images
+To process images with a contrast agent (contrast-enhanced), use the option ```--mode v6```.
+
 # [Frequently Asked Questions](doc/faq.md)
 For further details, consult the corresponding [publication](https://doi.org/10.1002/hbm.25159) and the [FAQ](doc/faq.md) or [contact us](http://www.scancore.org/index.php/research/imageanalytics)
