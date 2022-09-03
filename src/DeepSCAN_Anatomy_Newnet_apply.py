@@ -394,6 +394,18 @@ def load_checkpoint(checkpoint_file, device):
     return torch.load(checkpoint_file, map_location=device)
 
 
+def validate_input(t1, t1_data):
+    # input sanity check: we expect images in LIA orientation (FS space)!
+    orientation = ''.join(nib.aff2axcodes(t1.affine))
+    if orientation != 'LIA':
+        print('\nWARNING: Invalid orientation found for {}: {}\n'.format(subject_id, orientation))
+        
+    # check for non-zero corners (background)
+    corner_idx = np.ix_((0,-1),(0,-1),(0,-1))
+    if not np.allclose(t1_data[corner_idx].flatten(), 0):
+        print('\nWARNING: Non-zero voxels detected in background (corners). Make sure input is brain extracted (use --bet) and background intensities are exactly 0\n')
+    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DeepSCAN: Deep learning based anatomy segmentation and cortex parcellation')
     parser.add_argument("--model", required=False, default='v0_f1')
@@ -426,22 +438,19 @@ if __name__ == '__main__':
     unet.eval()
 
     t1 = nib.load(t1_file)
-    
-    # input sanity check: we expect images in LIA orientation (FS space)!
-    orientation = ''.join(nib.aff2axcodes(t1.affine))
-    if orientation != 'LIA':
-    	print('WARNING: Invalid orientation found for {}: {}'.format(subject_id, orientation))
+    t1_data = t1.get_fdata(dtype=np.float32)
+    validate_input(t1, t1_data)
     
     # apply model
     with torch.set_grad_enabled(False):
-        logit = apply_to_case(unet, volumes = [t1.get_fdata(dtype=np.float32)],batch_size=BATCH_SIZE,stack_depth = stack_depth, axes=[0,1,2])
+        logit = apply_to_case(unet, volumes = [t1_data], batch_size=BATCH_SIZE, stack_depth = stack_depth, axes=[0,1,2])
 
     print('DONE predicting') if VERBOSE else False
     
-    brain_tissue = logit[-1]>0
+    brain_tissue = logit[-1] > 0
     logit_sm = np.concatenate([logit[:-NUM_IGNORE_LABELS]], axis = 0)
     segmentation_sm = np.argmax(logit_sm, axis=0) + 1
-    segmentation_sm_masked = segmentation_sm*brain_tissue
+    segmentation_sm_masked = segmentation_sm * brain_tissue
     segmentation_stacked  = np.stack([segmentation_sm_masked == x for x in range(1, len(target_label_names)-NUM_IGNORE_LABELS+1)], axis=0)
     
     volumes = np.sum(segmentation_stacked, axis=(1,2,3))
