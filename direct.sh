@@ -27,7 +27,7 @@ SUBJECT_ID=$1
 DST=$2
 SCRIPT_DIR=`dirname $0`/src
 
-[[ -f ${DST}/softmax_seg.nii.gz ]] || die "Invalid OUTPUT_DIR '${DST}': no segmentation found. Did 'dl+direct.sh --no-cth' run?"
+[[ -f "${DST}/softmax_seg.nii.gz" ]] || die "Invalid OUTPUT_DIR '${DST}': no segmentation found. Did 'dl+direct.sh --no-cth' run?"
 
 
 # restore input parameters
@@ -38,14 +38,14 @@ if [ -f ${DST}/T1w_norm_noskull_mask.nii.gz ] ; then
 fi
 
 # DiReCT
-python ${SCRIPT_DIR}/DiReCT.py ${DST} ${DST}
+python ${SCRIPT_DIR}/DiReCT.py "${DST}" "${DST}"
 
 # extract stats
 THICK_VOLUME=${DST}/T1w_thickmap.nii.gz
-python ${SCRIPT_DIR}/extract_stats.py ${THICK_VOLUME} ${DST}/seg.nii.gz ${DST}/softmax_seg.nii.gz ${SUBJECT_ID}
+python ${SCRIPT_DIR}/extract_stats.py "${THICK_VOLUME}" "${DST}/seg.nii.gz" "${DST}/softmax_seg.nii.gz" "${SUBJECT_ID}"
 
 # uncrop to original size
-python ${SCRIPT_DIR}/crop.py --revert 1 ${MASK_VOLUME} ${THICK_VOLUME} ${DST}/T1w_norm_thickmap.nii.gz
+python ${SCRIPT_DIR}/crop.py --revert 1 "${MASK_VOLUME}" "${THICK_VOLUME}" "${DST}/T1w_norm_thickmap.nii.gz"
 FS_ARGS=" ${DST}/T1w_norm_thickmap.nii.gz:colormap=heat"
 
 echo

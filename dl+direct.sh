@@ -82,7 +82,7 @@ cat ${SCRIPT_DIR}/../doc/cite.md
 echo
 
 # convert into freesurfer space (resample to 1mm voxel, orient to LIA)
-python ${SCRIPT_DIR}/conform.py ${T1} ${DST}/T1w_norm.nii.gz
+python ${SCRIPT_DIR}/conform.py "${T1}" "${DST}/T1w_norm.nii.gz"
 
 HAS_GPU=`python -c 'import torch; print(torch.cuda.is_available())'`
 if [ ${HAS_GPU} != 'True' ] ; then
@@ -98,13 +98,13 @@ if [ ${DO_SKULLSTRIP} -gt 0 ] ; then
 		echo "Using ${MP2RAGE_INV2} to create brain mask"
 		BET_INPUT_VOLUME=${DST}/T1w_mp2rage_INV2_norm.nii.gz
 		BET_OPTS=" --mp2rage-inv2 ${BET_INPUT_VOLUME}"
-		python ${SCRIPT_DIR}/conform.py ${MP2RAGE_INV2} ${BET_INPUT_VOLUME}
+		python ${SCRIPT_DIR}/conform.py ${MP2RAGE_INV2} "${BET_INPUT_VOLUME}"
 	fi
 	IN_VOLUME=${DST}/T1w_norm_noskull.nii.gz
 	BET_INPUT_VOLUME=${DST}/T1w_norm.nii.gz
 	MASK_VOLUME=${DST}/T1w_norm_noskull_mask.nii.gz
 	
-	python ${SCRIPT_DIR}/bet.py ${BET_OPTS} ${BET_INPUT_VOLUME} ${IN_VOLUME} || die "hd-bet failed"
+	python ${SCRIPT_DIR}/bet.py ${BET_OPTS} "${BET_INPUT_VOLUME}" "${IN_VOLUME}" || die "hd-bet failed"
 else
 	# Assume input is already skull-stripped
 	IN_VOLUME=${DST}/T1w_norm.nii.gz
@@ -113,28 +113,28 @@ fi
 
 # cropping
 IN_VOLUME_CROP=${DST}/T1w_norm_noskull_cropped.nii.gz
-python ${SCRIPT_DIR}/crop.py ${MASK_VOLUME} ${IN_VOLUME} ${IN_VOLUME_CROP}
+python ${SCRIPT_DIR}/crop.py "${MASK_VOLUME}" "${IN_VOLUME}" "${IN_VOLUME_CROP}"
 
 
 # DeepScan segmentation
-python ${SCRIPT_DIR}/DeepSCAN_Anatomy_Newnet_apply.py ${MODEL_ARGS} ${IN_VOLUME_CROP} ${DST} ${SUBJECT_ID} || die "Segmentation failed"
+python ${SCRIPT_DIR}/DeepSCAN_Anatomy_Newnet_apply.py ${MODEL_ARGS} "${IN_VOLUME_CROP}" "${DST}" "${SUBJECT_ID}" || die "Segmentation failed"
 
 if [ ${DO_CT} -gt 0 ] ; then
 	# DiReCT
-	python ${SCRIPT_DIR}/DiReCT.py ${DST} ${DST} || die "DiReCT failed"
+	python ${SCRIPT_DIR}/DiReCT.py "${DST}" "${DST}" || die "DiReCT failed"
 
 	# extract stats
 	THICK_VOLUME=${DST}/T1w_thickmap.nii.gz
-	python ${SCRIPT_DIR}/extract_stats.py ${THICK_VOLUME} ${DST}/seg.nii.gz ${DST}/softmax_seg.nii.gz ${SUBJECT_ID}
+	python ${SCRIPT_DIR}/extract_stats.py "${THICK_VOLUME}" "${DST}/seg.nii.gz" "${DST}/softmax_seg.nii.gz" "${SUBJECT_ID}"
 fi
 
 FS_ARGS=""
 # uncrop to original size
 if [ ${DO_CT} -gt 0 ] ; then
-	python ${SCRIPT_DIR}/crop.py --revert 1 ${MASK_VOLUME} ${THICK_VOLUME} ${DST}/T1w_norm_thickmap.nii.gz
+	python ${SCRIPT_DIR}/crop.py --revert 1 "${MASK_VOLUME}" "${THICK_VOLUME}" "${DST}/T1w_norm_thickmap.nii.gz"
 	FS_ARGS=" ${DST}/T1w_norm_thickmap.nii.gz:colormap=heat"
 fi
-python ${SCRIPT_DIR}/crop.py --revert 1 ${MASK_VOLUME} ${DST}/softmax_seg.nii.gz ${DST}/T1w_norm_seg.nii.gz
+python ${SCRIPT_DIR}/crop.py --revert 1 "${MASK_VOLUME}" "${DST}/softmax_seg.nii.gz" "${DST}/T1w_norm_seg.nii.gz"
 
 # cleanup
 if [ ${KEEP_INTERMEDIATE} -eq 0 ] ; then
