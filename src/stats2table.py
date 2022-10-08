@@ -16,8 +16,13 @@ def collect_stats(directory, filename):
     for f in sorted(glob.glob('{}/*/{}'.format(directory, filename))):
         df_subj = pd.read_csv(f, dtype=str)
         df = df_subj if df is None else pd.concat([df, df_subj], ignore_index=True, sort=False)
+    
+    atlas = 'aparc'
+    if not df is None and 'G_and_S' in ''.join(df.columns):
+        atlas = 'aparca2009s'
+        df.columns = df.columns.str.replace('_and_', '&')
         
-    return df
+    return df, atlas
 
 
 def write_results(df, pattern, dst, suffix=''):
@@ -47,10 +52,10 @@ def main():
     if not os.path.exists(args.destination):
         os.makedirs(args.destination, exist_ok=True)
     
-    volumes = collect_stats(args.subjects_dir, 'result-vol.csv')
+    volumes, atlas = collect_stats(args.subjects_dir, 'result-vol.csv')
     if volumes is not None:
-        write_results(volumes, REGEX_LH, '{}/lh.aparc_stats_volume.txt'.format(args.destination), '_volume')
-        write_results(volumes, REGEX_RH, '{}/rh.aparc_stats_volume.txt'.format(args.destination), '_volume')
+        write_results(volumes, REGEX_LH, '{}/lh.{}_stats_volume.txt'.format(args.destination, atlas), '_volume')
+        write_results(volumes, REGEX_RH, '{}/rh.{}_stats_volume.txt'.format(args.destination, atlas), '_volume')
         
         # add cortex vol as sum of parcellations
         volumes['lhCortexVol'] = volumes.filter(regex=REGEX_LH, axis=1).drop('SUBJECT', axis=1).astype(float).sum(axis=1).astype(int)
@@ -59,15 +64,15 @@ def main():
         write_results(volumes, REGEX_SUBCORT, '{}/aseg_stats_volume.txt'.format(args.destination))
         
     
-    thick = collect_stats(args.subjects_dir, 'result-thick.csv')
+    thick, atlas = collect_stats(args.subjects_dir, 'result-thick.csv')
     if thick is not None:
-        write_results(thick, REGEX_LH, '{}/lh.aparc_stats_thickness.txt'.format(args.destination), '_thickness')
-        write_results(thick, REGEX_RH, '{}/rh.aparc_stats_thickness.txt'.format(args.destination), '_thickness')
+        write_results(thick, REGEX_LH, '{}/lh.{}_stats_thickness.txt'.format(args.destination, atlas), '_thickness')
+        write_results(thick, REGEX_RH, '{}/rh.{}_stats_thickness.txt'.format(args.destination, atlas), '_thickness')
     
-    thickstd = collect_stats(args.subjects_dir, 'result-thickstd.csv')
+    thickstd, atlas = collect_stats(args.subjects_dir, 'result-thickstd.csv')
     if thickstd is not None:
-        write_results(thickstd, REGEX_LH, '{}/lh.aparc_stats_thicknessstd.txt'.format(args.destination), '_thicknessstd')
-        write_results(thickstd, REGEX_RH, '{}/rh.aparc_stats_thicknessstd.txt'.format(args.destination), '_thicknessstd')
+        write_results(thickstd, REGEX_LH, '{}/lh.{}_stats_thicknessstd.txt'.format(args.destination, atlas), '_thicknessstd')
+        write_results(thickstd, REGEX_RH, '{}/rh.{}_stats_thicknessstd.txt'.format(args.destination, atlas), '_thicknessstd')
 
 
 if __name__ == '__main__':

@@ -11,27 +11,34 @@ import argparse
 
 
 # get cortical labels
-lut = pd.read_csv('{}/fs_lut.csv'.format(os.path.dirname(os.path.realpath(sys.argv[0]))))
-lut =  dict(zip(lut.Key, lut.Label))
-labels = list(filter(lambda x: ((x.startswith('lh') or x.startswith('rh')) and not 'unknown' in x and not 'corpuscallosum' in x), lut.keys()))
-all_labels = labels + ['lh-MeanThickness', 'rh-MeanThickness']
+def get_labels(offset):
+    lut = pd.read_csv('{}/fs_lut.csv'.format(os.path.dirname(os.path.realpath(sys.argv[0]))))
+    lut = {l.Key: l.Label for _, l in lut.iterrows() if l.Label >= offset and l.Label <= 3000+offset}
+    labels = list(filter(lambda x: ((x.startswith('lh') or x.startswith('rh')) and not 'nknown' in x and not 'corpuscallosum' in x and not 'Medial_wall' in x), lut.keys()))
+    all_labels = labels + ['lh-MeanThickness', 'rh-MeanThickness']
+    
+    return lut, labels, all_labels
 
 
 # get average and std thickness per parcellation (averaging over non-zero voxels in each given parcellation)
 def get_stats(thickness_map, parcellation):
+    # DK or destrieux atlas
+    offset = 0 if np.max(parcellation) <= 3000 else 10000
+    lut, labels, all_labels = get_labels(offset)
+    
     rois = [thickness_map[np.where(parcellation == lut[lbl])] for lbl in labels]
     # lh/rh MeanThickness
     rois = rois + [
-		thickness_map[np.where(np.logical_and(parcellation >= 1000, parcellation < 2000))],
-		thickness_map[np.where(np.logical_and(parcellation >= 2000, parcellation < 3000))]
+		thickness_map[np.where(np.logical_and(parcellation >= 1000+offset, parcellation < 2000+offset))],
+		thickness_map[np.where(np.logical_and(parcellation >= 2000+offset, parcellation < 3000+offset))]
 		]
-    return np.array([roi[roi.nonzero()].mean() for roi in rois]), np.array([roi[roi.nonzero()].std() for roi in rois])
+    return np.array([roi[roi.nonzero()].mean() for roi in rois]), np.array([roi[roi.nonzero()].std() for roi in rois]), all_labels
 
 
-def write_stats(stats, subject_id, fname):    
+def write_stats(stats, subject_id, fname, label_names):    
     with open(fname, 'w') as file:
         writer = csv.writer(file, delimiter=',')
-        writer.writerow(['SUBJECT'] + all_labels)
+        writer.writerow(['SUBJECT'] + label_names)
         writer.writerow([subject_id] + list(stats))
 		
 
@@ -95,9 +102,9 @@ if __name__ == '__main__':
     parc_nearest[coords_to_mask[:, 0], coords_to_mask[:, 1], coords_to_mask[:, 2]] = 0
     save_img(parc_nearest, '{}/boundary_nearest_masked.nii.gz'.format(dst_dir), ref_img)
     
-    stats_nearest_mean, stats_nearest_std = get_stats(thickness_map, parc_nearest)
+    stats_nearest_mean, stats_nearest_std, label_names = get_stats(thickness_map, parc_nearest)
     print('mean thick: {}'.format(np.mean(stats_nearest_mean[-2:])))
-    write_stats(stats_nearest_mean, subject_id, '{}/result-thick.csv'.format(dst_dir))
-    write_stats(stats_nearest_std, subject_id, '{}/result-thickstd.csv'.format(dst_dir))
+    write_stats(stats_nearest_mean, subject_id, '{}/result-thick.csv'.format(dst_dir), label_names)
+    write_stats(stats_nearest_std, subject_id, '{}/result-thickstd.csv'.format(dst_dir), label_names)
     
     
