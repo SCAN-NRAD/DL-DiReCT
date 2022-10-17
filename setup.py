@@ -6,18 +6,18 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='DL+DiReCT',
-    version='0.9.1',
+    version='1.0.0',
     description='DL+DiReCT - Direct Cortical Thickness Estimation using Deep Learning-based Anatomy Segmentation and Cortex Parcellation',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/SCAN-NRAD/DL-DiReCT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3',
     ],
-    keywords='brain morphometry, cortical thickness, MRI, neuroanatomy segmentation, deep learning',
+    keywords='brain morphometry, cortical thickness, MRI, neuroimaging, neuroanatomy segmentation, deep-learning',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     python_requires='>=3.7',

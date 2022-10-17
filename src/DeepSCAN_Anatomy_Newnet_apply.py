@@ -340,7 +340,7 @@ def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0
                 return self.length    
 
         test_generator = DataLoader(BrainDataTest(), sampler = SequentialSampler(BrainDataTest()), 
-                         num_workers=1,pin_memory=True)
+                         num_workers=0,pin_memory=True)
         for images, nonzero_masks  in test_generator:
             print('.', end='', flush=True) if VERBOSE else False
             images = images.to(device)
