@@ -301,7 +301,7 @@ class UNET_3D_to_2D(nn.Module):
 
 def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0], size=(DIM,DIM), mask_bg = True, lowmem=False):
     volume_0 = volumes[0]
-    ensemble_logits = []
+    ensemble_logits = None
 
     for axis in axes:
         print('Axis {}'.format(axis), end='', flush=True) if VERBOSE else False
@@ -360,6 +360,8 @@ def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0
 
         print('') if VERBOSE else False
         full_logit = np.concatenate(logit_total)
+        logit_total = None
+        
         new_shape = full_logit[:, 0, :, :].shape
 
         shape_difference = (new_shape[0] - np.swapaxes(volume_0,0, axis).shape[0],
@@ -372,10 +374,12 @@ def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0
                                shape_difference[2]//2: new_shape[2]- (shape_difference[2] - shape_difference[2]//2)]
         full_logit = np.swapaxes(full_logit, 1, axis+1)
 
-        ensemble_logits.append(full_logit)
+        if ensemble_logits is None:
+            ensemble_logits = np.zeros((3,) + full_logit.shape, dtype=np.float16 if lowmem else np.float32)
+        ensemble_logits[axis, ] = full_logit
         
     
-    return np.mean(np.array(ensemble_logits),axis=0)
+    return np.mean(ensemble_logits, axis=0)
 
 
 def locate_model(model_file):
