@@ -15,6 +15,7 @@ optional arguments:
 	-n|--no-cth		Skip cortical thickness (DiReCT), just perform segmentation	
 	-m|--model		Use given trained model
 	-k|--keep		Keep intermediate files
+	-l|--lowmem		Use less memory (use fp16 for ensembling)
 	
 EOF
 	exit 0
@@ -35,6 +36,7 @@ SUBJECT_ID="subj_id"
 DO_SKULLSTRIP=0
 DO_CT=1
 KEEP_INTERMEDIATE=0
+LOW_MEM_ARG=""
 MODEL_ARGS=""
 MP2RAGE_INV2=""
 if [ -z "${ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS}" ] ; then
@@ -53,6 +55,7 @@ while [[ $# -gt 0 ]]; do
 		-n|--no-cth)	DO_CT=0 ;;
 		-m|--model)	shift; MODEL_ARGS="--model $1" ;;
 		-k|--keep)	KEEP_INTERMEDIATE=1 ;;
+		-l|--lowmem)	LOW_MEM_ARG="--lowmem True" ;;
 		-*)		invalid "$1" ;;
 		*)		POSITIONAL+=("$1") ;;
 	esac
@@ -117,7 +120,7 @@ python ${SCRIPT_DIR}/crop.py "${MASK_VOLUME}" "${IN_VOLUME}" "${IN_VOLUME_CROP}"
 
 
 # DeepScan segmentation
-python ${SCRIPT_DIR}/DeepSCAN_Anatomy_Newnet_apply.py ${MODEL_ARGS} "${IN_VOLUME_CROP}" "${DST}" "${SUBJECT_ID}" || die "Segmentation failed"
+python ${SCRIPT_DIR}/DeepSCAN_Anatomy_Newnet_apply.py ${LOW_MEM_ARG} ${MODEL_ARGS} "${IN_VOLUME_CROP}" "${DST}" "${SUBJECT_ID}" || die "Segmentation failed"
 
 if [ ${DO_CT} -gt 0 ] ; then
 	# DiReCT

@@ -299,7 +299,7 @@ class UNET_3D_to_2D(nn.Module):
 
     
 
-def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0], size=(DIM,DIM), mask_bg = True):
+def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0], size=(DIM,DIM), mask_bg = True, lowmem=False):
     volume_0 = volumes[0]
     ensemble_logits = []
 
@@ -351,7 +351,11 @@ def apply_to_case(model, volumes, batch_size, stack_depth = stack_depth, axes=[0
             if mask_bg:
                 outputs = outputs * torch.unsqueeze(nonzero_mask[0],1)
 
-            logit_total.append(outputs.cpu().data.numpy())
+            out_cpu = outputs.cpu().data.numpy()
+            if lowmem:
+                out_cpu = out_cpu.astype(np.float16)
+                
+            logit_total.append(out_cpu)
 
 
         print('') if VERBOSE else False
@@ -409,6 +413,7 @@ def validate_input(t1, t1_data):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DeepSCAN: Deep learning based anatomy segmentation and cortex parcellation')
     parser.add_argument("--model", required=False, default='v0_f1')
+    parser.add_argument("--lowmem", required=False, default=False)
     parser.add_argument("T1w")
     parser.add_argument("destination_dir")
     parser.add_argument("subject_id")
@@ -443,7 +448,7 @@ if __name__ == '__main__':
     
     # apply model
     with torch.set_grad_enabled(False):
-        logit = apply_to_case(unet, volumes = [t1_data], batch_size=BATCH_SIZE, stack_depth = stack_depth, axes=[0,1,2])
+        logit = apply_to_case(unet, volumes = [t1_data], batch_size=BATCH_SIZE, stack_depth = stack_depth, axes=[0,1,2], lowmem=args.lowmem)
 
     print('DONE predicting') if VERBOSE else False
     
@@ -467,7 +472,7 @@ if __name__ == '__main__':
     for idx, x in enumerate(target_label_names):
         lbl_name = target_label_names[idx]
         if not SAVE_LOGITS_FILTER or lbl_name in SAVE_LOGITS_FILTER:
-            nib.save(nib.Nifti1Image(logit[idx, :, :, :], affine), '{}/seg_{}.nii.gz'.format(output_dir, lbl_name))
+            nib.save(nib.Nifti1Image(logit[idx, :, :, :].astype(np.float32), affine), '{}/seg_{}.nii.gz'.format(output_dir, lbl_name))
 
     with open('{}/result-vol.csv'.format(output_dir), 'w') as file:
         writer = csv.writer(file, delimiter=',')

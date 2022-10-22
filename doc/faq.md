@@ -27,3 +27,6 @@ You may derive radiomics shape features of subcortical structures from the segme
 ```bash
 radiomics_extractor --results_csv dl_radiomics.csv <output_dir>
 ```
+
+## What are the system requirements to run DL+DiReCT?
+A linux environment with a GPU (at least 8 GB memory) and approx. 16 GB free memory is recommended. If no GPU is available, it will fallback to the CPU and processing time increases. For environments with low memory, you may use the option ```--lowmem``` to reduce RAM consumption (might slightly alter the results).
