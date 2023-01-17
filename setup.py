@@ -21,7 +21,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     python_requires='>=3.7',
-    install_requires=['antspyx==0.3.2',
+    install_requires=['antspyx==0.3.5',
                       'HD_BET @ https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip#egg=HD_BET-1.0',
                       'nibabel>=3.2.1',
                       'numpy>=1.17.4',
@@ -33,7 +33,7 @@ setup(
                       'torch>=1.3.1'],
     dependency_links=['https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip#egg=HD_BET-1.0'],
     
-    entry_points={'console_scripts': ['dl+direct=run_script:run', 'direct=run_script:run',
+    entry_points={'console_scripts': ['dl+direct=run_script:run', 'direct=run_script:run', 'batch-dl+direct=run_script:run',
                                       'stats2table=stats2table:main', 'radiomics_extractor=radiomics_extractor:main', 'radiomics2table=radiomics2table:main']},
     project_urls={  # Optional
         #'Bug Reports': 'https://github.com/SCAN-NRAD/DL-DiReCT/issues',

@@ -15,7 +15,8 @@ def save_img(img, dst, name, ref_img):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Prepare input for DiReCT')
+    parser = argparse.ArgumentParser(description='Prepare input and run DiReCT')
+    parser.add_argument('--prepare-only', type=bool, required=False, default=False, help='Prepare input only, skip DiReCT.')
     parser.add_argument("source_dir")
     parser.add_argument("destination_dir")
     args = parser.parse_args()
@@ -72,8 +73,9 @@ if __name__ == '__main__':
     save_img(gm_prob, dst, 'gmprobT', ref_img)
     save_img(wm_prob,dst,  'wmprobT', ref_img)
     
-    # run DiReCT (KellyKapowski), equivalent to
-    #     KellyKapowski -d 3 -s ${DST}/seg.nii.gz -g ${DST}/gmprobT.nii.gz -w ${DST}/wmprobT.nii.gz -o ${THICK_VOLUME} -c "[ 45,0.0,10 ]" -v
-    thick = ants.kelly_kapowski(s=ants.from_numpy(seg_img), g=ants.from_numpy(gm_prob), w=ants.from_numpy(wm_prob), c='[ 45,0.0,10 ]', v='1')
-    save_img(thick.numpy(), dst, 'T1w_thickmap', ref_img)
+    if not args.prepare_only:
+        # run DiReCT (KellyKapowski), equivalent to
+        #     KellyKapowski -d 3 -s ${DST}/seg.nii.gz -g ${DST}/gmprobT.nii.gz -w ${DST}/wmprobT.nii.gz -o ${THICK_VOLUME} -c "[ 45,0.0,10 ]" -v
+        thick = ants.kelly_kapowski(s=ants.from_numpy(seg_img), g=ants.from_numpy(gm_prob), w=ants.from_numpy(wm_prob), c='[ 45,0.0,10 ]', v='1')
+        save_img(thick.numpy(), dst, 'T1w_thickmap', ref_img)
     

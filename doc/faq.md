@@ -30,3 +30,10 @@ radiomics_extractor --results_csv dl_radiomics.csv <output_dir>
 
 ## What are the system requirements to run DL+DiReCT?
 A linux environment with a GPU (at least 8 GB memory) and approx. 16 GB free memory is recommended. If no GPU is available, it will fallback to the CPU and processing time increases. For environments with low memory, you may use the option ```--lowmem``` to reduce RAM consumption (might slightly alter the results).
+
+## Is there a batch mode to process multiple MRI?
+You may use ```batch-dl+direct``` to process multiple subjects in parallel by distributing jobs on CPU cores and GPUs. Put the input data in a directory *rawdata* with a subdirectory for each subject and the T1.nii.gz inside. Example (using 16 cores and two jobs on the GPU)
+
+```bash
+batch-dl+direct --cpu 16 --gpu 2 rawdata DL+DiReCT_results
+```

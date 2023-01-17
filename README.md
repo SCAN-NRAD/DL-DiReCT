@@ -15,6 +15,7 @@ Human brain mapping. 2020; 41: 4804-4814. https://doi.org/10.1002/hbm.25159
 # Installation
 ## Create virtual environment (optional)
 Download and install [Miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html) and create a new conda environment:
+
 ```bash
 conda create -y -n DL_DiReCT python=3.7
 source activate DL_DiReCT
