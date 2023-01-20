@@ -8,6 +8,7 @@ DL+DiReCT expects the input without skull (a.k.a. brain extracted / skull-stripp
 
 ## Can I use an MP2RAGE sequence as input?
 In principal yes, DL+DiReCT should work fine on a (brain extracted) MP2RAGE sequence. However, the characteristic "salt & pepper" noise that is a result of numerical instability that amplifies noise in areas with a very low SNR like background may require special treatment for brain extraction. For brain extraction using HD-BET, you may use the the 2<sup>nd</sup> inversion recovery (proton density-weighted) image from an MP2RAGE sequence to generate the brain mask which is then applied to the original unified image. This is available in ```dl+direct``` with the options
+
 ```bash
 --bet --mp2rage-inv2 <path_to_inv2.nii.gz>
 ```
@@ -32,8 +33,9 @@ radiomics_extractor --results_csv dl_radiomics.csv <output_dir>
 A linux environment with a GPU (at least 8 GB memory) and approx. 16 GB free memory is recommended. If no GPU is available, it will fallback to the CPU and processing time increases. For environments with low memory, you may use the option ```--lowmem``` to reduce RAM consumption (might slightly alter the results).
 
 ## Is there a batch mode to process multiple MRI?
-You may use ```batch-dl+direct``` to process multiple subjects in parallel by distributing jobs on CPU cores and GPUs. Put the input data in a directory *rawdata* with a subdirectory for each subject and the T1.nii.gz inside. Example (using 16 cores and two jobs on the GPU)
+You may use ```batch-dl+direct``` to process multiple subjects in parallel by distributing jobs on CPU cores and GPUs. Requires *GNU parallel* (```sudo apt install parallel```).
+Put the input data in a directory *rawdata* with a subdirectory for each subject and the T1.nii.gz inside. Example (using 16 cores and two jobs on the GPU):
 
 ```bash
-batch-dl+direct --cpu 16 --gpu 2 rawdata DL+DiReCT_results
+batch-dl+direct --cpu 16 --gpu 2 --bet rawdata DL+DiReCT_results
 ```

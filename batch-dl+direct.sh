@@ -2,7 +2,7 @@
 
 usage() {
 cat << EOF
-Usage: batch-dl+direct [-h] [-c n_cpu] [-g n_GPU] SRC_DIR DST_DIR
+Usage: batch-dl+direct [-h] [-c n_cpu] [-g n_GPU] [-b] [-m model_file] SRC_DIR DST_DIR
 Batch processing using DL+DiReCT (with --bet), with N parallel jobs on CPU and GPU.
 SRC_DIR is a directory with data to process, each subject should be in a separate subdirectory (with a T1.nii.gz inside).
 Results are written to DST_DIR.
@@ -12,6 +12,8 @@ optional arguments:
 	-t|--t1			name of T1 nifti (default: T1.nii.gz)
 	-c|--cpu		number of parallel CPU jobs (default 8)
 	-g|--gpu		number of parallel GPU jobs (default 1)
+	-b|--bet		Skull-stripping using hd-bet
+	-m|--model		Use given trained model (default v0, and v6 for _ce images)
 	
 EOF
 	exit 0
@@ -32,6 +34,8 @@ die() {
 T1_FILE=T1.nii.gz
 N_PARALLEL_GPU=1
 N_PARALLEL_CPU=8
+MODEL_ARGS=""
+BET_ARGS=""
 
 # Parse arguments
 POSITIONAL=()
@@ -41,6 +45,8 @@ while [[ $# -gt 0 ]]; do
 		-t|--t1)	shift; T1_FILE=$1 ;;
 		-g|--gpu)	shift; N_PARALLEL_GPU=$1 ;;
 		-c|--cpu)	shift; N_PARALLEL_CPU=$1 ;;
+		-b|--bet)	BET_ARGS=" --bet" ;;
+		-m|--model)	shift; MODEL_ARGS=" --model $1" ;;
 		-*)		invalid "$1" ;;
 		*)		POSITIONAL+=("$1") ;;
 	esac
@@ -57,6 +63,8 @@ fi
 export SRC=$1
 export DST=$2
 export T1_FILE
+export BET_ARGS
+export MODEL_ARGS
 
 [[ "`which parallel`X" != "X" ]] || die "'parallel' not found. Install it with 'sudo apt install parallel'"
 [[ -d ${SRC} ]] || die "Source directory ${SRC} not found"
@@ -68,21 +76,19 @@ export JOB_QUEUE=job_queue.txt
 run_dl() {
 	SUBJ=$1
 	START=`date +%s`
-	BET_OPTS=""
-	MODEL_ARG=""
 
 	DIR=${DST}/${SUBJ}
 	mkdir -p ${DIR}
 	if [ ! -f ${DIR}/T1w_norm_seg.nii.gz ] ; then
 		if [ -f ${SRC}/${SUBJ}/T1_INV2.nii.gz ] ; then
 			# MP2Rage
-			BET_OPTS=" --mp2rage-inv2 ${SRC}/${SUBJ}/T1_INV2.nii.gz"
+			BET_ARGS=" ${BET_ARGS} --mp2rage-inv2 ${SRC}/${SUBJ}/T1_INV2.nii.gz"
 		fi
 		if [[ "${SUBJ}" =~ .*"_ce"$ ]]; then
 			# if the subject name ends with '_ce', treat as contrast-enhanced (ce) image
-			MODEL_ARG=" --model v6"
+			MODEL_ARGS=" --model v6"
 		fi
-		dl+direct --subject ${SUBJ} --bet ${BET_OPTS} --no-cth --keep ${MODEL_ARG} ${SRC}/${SUBJ}/${T1_FILE} ${DIR} 2>&1 >> ${DIR}/dl.log
+		dl+direct --subject ${SUBJ} ${BET_ARGS} --no-cth --keep ${MODEL_ARGS} ${SRC}/${SUBJ}/${T1_FILE} ${DIR} 2>&1 >> ${DIR}/dl.log
 	fi
 	
 	STOP=`date +%s`

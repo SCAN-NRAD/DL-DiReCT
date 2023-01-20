@@ -17,7 +17,7 @@ Human brain mapping. 2020; 41: 4804-4814. https://doi.org/10.1002/hbm.25159
 Download and install [Miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html) and create a new conda environment:
 
 ```bash
-conda create -y -n DL_DiReCT python=3.7
+conda create -y -n DL_DiReCT python=3.10
 source activate DL_DiReCT
 ```
 
@@ -26,7 +26,7 @@ source activate DL_DiReCT
 cd ${HOME}
 git clone https://github.com/SCAN-NRAD/DL-DiReCT.git
 cd DL-DiReCT
-pip install -e .
+pip install numpy && pip install -e .
 ```
 
 # Usage
@@ -50,7 +50,7 @@ Following files of interest are generated in the output directory:
 Results may be collected into FreeSurfer alike statistics files with ```stats2table```.
 
 ## Contrast-enhanced (CE) MRI
-To process images with a contrast agent (contrast-enhanced), use the option ```--model v6``` ([Rebsamen et al., 2022](https://doi.org/10.3389/fneur.2022.812432)).
+To process images with a contrast agent (contrast-enhanced), use the option ```--model v6``` ([Rebsamen et al., 2022](https://doi.org/10.1002/hbm.26117)).
 
 # Available Models
 The following models are available with the ```--model ...``` option:
