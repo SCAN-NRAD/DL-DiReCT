@@ -21,7 +21,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     python_requires='>=3.7',
-    install_requires=['antspyx==0.3.5',
+    install_requires=['antspyx>=0.3.5',
                       'HD_BET @ https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip#egg=HD_BET-1.0',
                       'nibabel>=3.2.1',
                       'numpy>=1.17.4',
