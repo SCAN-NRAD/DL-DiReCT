@@ -3,6 +3,8 @@
 ## What input MRI is required?
 Requirements are similar to FreeSurfer: High quality 3D T1-weighted MRI with 1mm isotropic resolution acquired at 3T or 1.5T. Other resolutions are automatically re-sampled to 1mm isovoxels (inspect the results in this case). Recommended sequences are those with an excellent gray/white matter contrast like Siemens [MP-RAGE](https://doi.org/10.1002/mrm.1910150117) (ideally with TI=1100ms) as proposed by [ADNI](https://doi.org/10.1002/jmri.21049), or [MDEFT](https://doi.org/10.1016/j.neuroimage.2003.09.062). Similar sequences should work as well, just try it out.
 
+__Note__: MR sequence parameters have an influence on the GM/WM contrast which can affect the morphometric measures (see [Rebsamen et al., 2023](https://doi.org/10.1016/j.neurad.2023.04.003)).
+
 DL+DiReCT expects the input without skull (a.k.a. brain extracted / skull-stripped). You may use the ```--bet``` options to skull-strip the input using [HD-BET](https://github.com/MIC-DKFZ/HD-BET/) before processing. If the input is already skull-stripped, ensure background voxels are zero.
 
 
