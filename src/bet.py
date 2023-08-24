@@ -75,7 +75,7 @@ if __name__ == '__main__':
         
     
     # run HD-BET
-    run_hd_bet(input_file, output_file, mode=hdbet_mode, device=hdbet_device, postprocess=True, do_tta=hdbet_tta)
+    run_hd_bet(input_file, output_file, mode=hdbet_mode, device=hdbet_device, postprocess=True, do_tta=hdbet_tta, bet=True)
     
     if args.mp2rage_inv2 or args.mp2rage_inv2x:
         # rename mask from intermediate image
