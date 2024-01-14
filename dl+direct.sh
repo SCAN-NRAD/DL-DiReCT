@@ -27,7 +27,11 @@ invalid() {
 }
 
 die() {
-	echo "ERROR: $1"
+	RET=!?
+	echo "ERROR (${RET}): $1"
+	if [ ${RET} -eq 137 ] ; then
+		 echo "Likely out-of-memory. Try with '--lowmem' option"
+	fi
 	exit 1
 }
 
