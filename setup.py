@@ -24,7 +24,7 @@ setup(
     install_requires=['antspyx>=0.3.5',
                       'HD_BET @ https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip#egg=HD_BET-1.0',
                       'nibabel>=3.2.1',
-                      'numpy>=1.17.4',
+                      'numpy<2.0.0',
                       'pandas>=0.25.3',
                       'pyradiomics>=3.0.1',
                       'scikit-learn>=0.21.3',

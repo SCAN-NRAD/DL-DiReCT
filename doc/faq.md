@@ -19,7 +19,7 @@ __Note__: A de-noised image can also be calculated by multiplying the unified im
 
 
 ## What is the accuracy of DL+DiReCT?
-Evaluating morphometry methods is difficult due to the lack of a gold-standard reference. In the related publications ([1](https://doi.org/10.1002/hbm.25159), [2](https://doi.org/10.1002/hbm.26117)), experimental assessment of robustness and sensitivity yielded good results.
+Evaluating morphometry methods is difficult due to the lack of a gold-standard reference. In the related publications ([1](https://doi.org/10.1002/hbm.25159), [2](https://doi.org/10.1002/hbm.26117), [3](https://doi.org/10.1016/j.nicl.2024.103624)), experimental assessment of robustness and sensitivity yielded good results.
 
 A benchmarking study ([Rusak et al., 2022](https://doi.org/10.1016/j.media.2022.102576)) quantified DL+DiReCT to be sensitive enough to measure subtle atrophy rates as low as approx. 0.01 mm. 
 
