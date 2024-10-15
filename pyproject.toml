@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "DL-DiReCT"
+version = "1.0.1"
+description = "DL+DiReCT - Direct Cortical Thickness Estimation using Deep Learning-based Anatomy Segmentation and Cortex Parcellation"
+readme = "README.md"
+authors = [ {name = "Michael Rebsamen"} ]
+license = {file = "LICENSE"}
+keywords = ["brain morphometry", "cortical thickness", "MRI", "neuroimaging", "neuroanatomy segmentation", "deep-learning"]
+requires-python = ">=3.7"
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+	"Intended Audience :: Science/Research",
+	"Topic :: Scientific/Engineering",
+	"Programming Language :: Python :: 3",
+]
+
+dependencies = [
+	"antspyx>=0.3.5",
+	"HD_BET @ https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip",
+	"nibabel>=3.2.1",
+	"numpy<2.0.0",
+	"pandas>=0.25.3",
+	"pyradiomics>=3.0.1; python_version<'3.12'",
+	"pyradiomics @ https://github.com/AIM-Harvard/pyradiomics/archive/refs/heads/circle-ci-mac-os.zip ; python_version>='3.12'",
+	"scikit-learn>=0.21.3",
+	"scikit-image>=0.16.2",
+	"scipy>=1.3.3",
+	"torch>=1.3.1",	
+]
+
+[project.urls]
+Source = "https://github.com/SCAN-NRAD/DL-DiReCT"
+Publication = "https://doi.org/10.1002/hbm.25159"
+Issues = "https://github.com/SCAN-NRAD/DL-DiReCT/issues"
+
+[project.scripts]
+"dl+direct" = "run_script:run"
+"direct" = "run_script:run"
+"batch-dl+direct" = "run_script:run"
+"stats2table" = "stats2table:main"
+"radiomics_extractor" = "radiomics_extractor:main"
+"radiomics2table" = "radiomics2table:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
