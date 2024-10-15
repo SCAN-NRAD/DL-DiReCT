@@ -91,7 +91,7 @@ echo
 # convert into freesurfer space (resample to 1mm voxel, orient to LIA)
 python ${SCRIPT_DIR}/conform.py "${T1}" "${DST}/T1w_norm.nii.gz"
 
-HAS_GPU=`python -c 'import torch; print(torch.cuda.is_available())'`
+HAS_GPU=`python -c 'import torch; print(torch.cuda.is_available() or (hasattr(torch.backends, "mps") and torch.backends.mps.is_available()))'`
 if [ ${HAS_GPU} != 'True' ] ; then
 	echo "WARNING: No GPU/CUDA device found. Running on CPU might take some time..."
 fi
@@ -110,6 +110,7 @@ if [ ${DO_SKULLSTRIP} -gt 0 ] ; then
 	IN_VOLUME=${DST}/T1w_norm_noskull.nii.gz
 	BET_INPUT_VOLUME=${DST}/T1w_norm.nii.gz
 	MASK_VOLUME=${DST}/T1w_norm_noskull_mask.nii.gz
+	export PYTORCH_ENABLE_MPS_FALLBACK=1
 	
 	python ${SCRIPT_DIR}/bet.py ${BET_OPTS} "${BET_INPUT_VOLUME}" "${IN_VOLUME}" || die "hd-bet failed"
 else

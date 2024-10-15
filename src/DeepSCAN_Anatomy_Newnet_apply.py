@@ -399,7 +399,7 @@ def load_checkpoint(checkpoint_file, device):
         sys.exit(1)
         
     print('loading checkpoint {}'.format(checkpoint_file)) if VERBOSE else False
-    return torch.load(checkpoint_file, map_location=device)
+    return torch.load(checkpoint_file, weights_only=True, map_location=device)
 
 
 def validate_input(t1, t1_data):
@@ -435,7 +435,7 @@ if __name__ == '__main__':
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else ('mps' if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available() else 'cpu'))
     checkpoint = load_checkpoint(model_file, device)
     target_label_names = checkpoint['label_names']
     # number of last labels to ignore for hard segmentation (argmax), e.g. left-hemi, right-hemi, brain

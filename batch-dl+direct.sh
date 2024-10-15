@@ -72,6 +72,8 @@ export MODEL_ARGS
 export JOB_QUEUE=job_queue.txt
 [[ -f ${JOB_QUEUE} ]] && rm ${JOB_QUEUE}
 
+TAIL=tail
+[[ "`uname -s`" == "Darwin" ]] && TAIL=gtail
 
 run_dl() {
 	SUBJ=$1
@@ -127,5 +129,5 @@ true > ${JOB_QUEUE}
 # create first N_PARALLEL_CPU dummy entries. Otherwise jobs will only start once N_PARALLEL_CPU jobs are queued
 for i in `seq 1 ${N_PARALLEL_CPU}` ; do echo dummy >> ${JOB_QUEUE} ; done
 
-tail -n+0 -f ${JOB_QUEUE} --pid ${PID_DL} | parallel -j ${N_PARALLEL_CPU} run_direct {}
+${TAIL} -n+0 -f ${JOB_QUEUE} --pid ${PID_DL} | parallel -j ${N_PARALLEL_CPU} run_direct {}
 

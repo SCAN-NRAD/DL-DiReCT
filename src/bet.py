@@ -46,7 +46,9 @@ if __name__ == '__main__':
     
     print('Brain extraction using HD-BET [https://doi.org/10.1002/hbm.24750] ...')
     
-    if not torch.cuda.is_available():
+    if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+	    hdbet_device = 'mps'
+    elif not torch.cuda.is_available():
         print('No GPU found. Running hd-bet in fast mode, check results! Make sure you have enough memory.')
         hdbet_mode = 'fast'
         hdbet_device = 'cpu'

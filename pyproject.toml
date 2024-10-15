@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "DL-DiReCT"
-version = "1.0.1"
+version = "1.0.2"
 description = "DL+DiReCT - Direct Cortical Thickness Estimation using Deep Learning-based Anatomy Segmentation and Cortex Parcellation"
 readme = "README.md"
 authors = [ {name = "Michael Rebsamen"} ]
@@ -20,7 +20,7 @@ classifiers = [
 
 dependencies = [
 	"antspyx>=0.3.5",
-	"HD_BET @ https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip",
+	"HD_BET @ https://github.com/mrunibe/HD-BET/archive/refs/heads/master.zip",
 	"nibabel>=3.2.1",
 	"numpy<2.0.0",
 	"pandas>=0.25.3",
