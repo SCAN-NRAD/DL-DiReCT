@@ -5,7 +5,100 @@ import os
 import sys
 import argparse
 import ants
+from ants import lib 
+from ants.core import ants_image as iio
 
+# This function OVERWRITES ANTS kelly_kapowski() function
+# To output the velocity fields
+def kelly_kapowski(s, g, w, its=45, r=0.025, m=1.5, gm_label=2, wm_label=3, **kwargs):
+    """
+    Compute cortical thickness using the DiReCT algorithm
+    """
+    if ants.is_image(s):
+        s = s.clone('unsigned int')
+
+    d = s.dimension
+    outimg = g.clone() * 0.0
+    kellargs = {'d': d,
+                's': "[{},{},{}]".format(get_pointer_string(s),gm_label,wm_label),
+                'g': g,
+                'w': w,
+                'c': "[{}]".format(its),
+                'r': r,
+                'm': m,
+                'o': outimg}
+    for k, v in kwargs.items():
+        kellargs[k] = v
+
+    processed_kellargs = process_arguments(kellargs)
+    libfn = get_lib_fn('KellyKapowski')
+    libfn(processed_kellargs)
+
+    return outimg
+
+# This function OVERWRITES ANTS process_arguments() function to output the velocity fields
+# It fix the bug on the argument parser
+def get_lib_fn(string):
+    return getattr(lib, string)
+
+def get_pointer_string(image):
+    return lib.ptrstr(image.pointer)
+
+def process_arguments(args):
+    """
+    Needs to be better validated.
+    """
+    p_args = []
+    if isinstance(args, dict):
+        for argname, argval in args.items():
+            if "-MULTINAME-" in argname:
+                # have this little hack because python doesnt support
+                # multiple dict entries w/ the same key like R lists
+                argname = argname[: argname.find("-MULTINAME-")]
+            if argval is not None:
+                if len(argname) > 1:
+                    p_args.append("--%s" % argname)
+                else:
+                    p_args.append("-%s" % argname)
+
+                if isinstance(argval, iio.ANTsImage):
+                    p_args.append(_ptrstr(argval.pointer))
+                elif isinstance(argval, list):
+                    p = "["
+                    for av in argval:
+                        if isinstance(av, iio.ANTsImage):
+                            av = _ptrstr(av.pointer)
+                        elif str(av) == "True":
+                            av = str(1)
+                        elif str(av) == "False":
+                            av = str(0)
+                        p += av + ","
+                    p += "]"
+
+                    p_args.append(p)
+                else:
+                    p_args.append(str(argval))
+
+    elif isinstance(args, list):
+        for arg in args:
+            if isinstance(arg, iio.ANTsImage):
+                pointer_string = _ptrstr(arg.pointer)
+                p_arg = pointer_string
+            elif arg is None:
+                pass
+            elif str(arg) == "True":
+                p_arg = str(1)
+            elif str(arg) == "False":
+                p_arg = str(0)
+            else:
+                p_arg = str(arg)
+            p_args.append(p_arg)
+    return p_args
+
+def _ptrstr(pointer):
+    """ get string representation of a py::capsule (aka pointer) """
+    libfn = get_lib_fn("ptrstr")
+    return libfn(pointer)
 
 def save_img(img, dst, name, ref_img):
     fname = '{}/{}.nii.gz'.format(dst, name)
@@ -76,6 +169,12 @@ if __name__ == '__main__':
     if not args.prepare_only:
         # run DiReCT (KellyKapowski), equivalent to
         #     KellyKapowski -d 3 -s ${DST}/seg.nii.gz -g ${DST}/gmprobT.nii.gz -w ${DST}/wmprobT.nii.gz -o ${THICK_VOLUME} -c "[ 45,0.0,10 ]" -v
-        thick = ants.kelly_kapowski(s=ants.from_numpy(seg_img), g=ants.from_numpy(gm_prob), w=ants.from_numpy(wm_prob), c='[ 45,0.0,10 ]', v='1')
+        thick = ants.from_numpy(wm_prob.copy())
+        kelly_kapowski(s=ants.from_numpy(seg_img), g=ants.from_numpy(gm_prob), w=ants.from_numpy(wm_prob), c='[ 45,0.0,10 ]', v='1', o=[thick, dst+"/T1w_"])
+
+        # Check thickness is not still all zeros
+        if thick.sum() == 0.0:
+            raise RuntimeError("KellyKapowski failed to compute thickness")
+
         save_img(thick.numpy(), dst, 'T1w_thickmap', ref_img)
     

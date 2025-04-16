@@ -46,7 +46,7 @@ while [[ $# -gt 0 ]]; do
 		-g|--gpu)	shift; N_PARALLEL_GPU=$1 ;;
 		-c|--cpu)	shift; N_PARALLEL_CPU=$1 ;;
 		-b|--bet)	BET_ARGS=" --bet" ;;
-		-m|--model)	shift; MODEL_ARGS=" --model $1" ;;
+		-m|--model)	shift; MODEL_ARGS="--model $1" ;;
 		-*)		invalid "$1" ;;
 		*)		POSITIONAL+=("$1") ;;
 	esac
@@ -60,6 +60,7 @@ if [ $# -lt 2 ] ; then
 	usage 1
 fi
 
+export SCRIPT_DIR=`dirname $0`/src
 export SRC=$1
 export DST=$2
 export T1_FILE
@@ -88,9 +89,9 @@ run_dl() {
 		fi
 		if [[ "${SUBJ}" =~ .*"_ce"$ ]]; then
 			# if the subject name ends with '_ce', treat as contrast-enhanced (ce) image
-			MODEL_ARGS=" --model v6"
+			MODEL_ARGS="--model v6"
 		fi
-		dl+direct --subject ${SUBJ} ${BET_ARGS} --no-cth --keep ${MODEL_ARGS} ${SRC}/${SUBJ}/${T1_FILE} ${DIR} 2>&1 >> ${DIR}/dl.log
+		dl+direct --subject ${SUBJ} ${BET_ARGS} --no-cth --no-fsr --keep ${MODEL_ARGS} ${SRC}/${SUBJ}/${T1_FILE} ${DIR} 2>&1 >> ${DIR}/dl.log
 	fi
 	
 	STOP=`date +%s`
@@ -114,6 +115,8 @@ run_direct() {
 	if [ ! -f ${DIR}/T1w_norm_thickmap.nii.gz ] ; then
 		direct ${SUBJ} ${DIR} 2>&1 >> ${DIR}/direct.log
 	fi
+	
+	fast_surface_reconstruction ${SCRIPT_DIR} ${SUBJ} ${DIR} "'$MODEL_ARGS'" &> ${DIR}/fast_surface_reconstruction.log
 
 	STOP=`date +%s`
 	DT=$((${STOP}-${START}))

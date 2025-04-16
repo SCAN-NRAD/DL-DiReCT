@@ -2,7 +2,7 @@
 
 usage() {
 cat << EOF
-Usage: dl+direct [-h] [-s subject] [-b [-i inv2_file]] [-n] [-m model_file] [-k] T1_FILE OUTPUT_DIR
+Usage: dl+direct [-h] [-s subject] [-b [-i inv2_file]] [-n] [-f] [-g] [-m model_file] [-k] T1_FILE OUTPUT_DIR
 Process T1_FILE (nifti) with dl+direct and put results into OUTPUT_DIR.
 Input is expected to be a skull-stripped T1w MRI. You may specify --bet to remove
 the skull (using hd-bet).
@@ -12,7 +12,9 @@ optional arguments:
 	-s|--subject		subject-id (written to .csv results)
 	-b|--bet		Skull-stripping using hd-bet
 	-i|--mp2rage-inv2	Use given 2nd inversion recovery image from an MP2Rage to generate brain mask
-	-n|--no-cth		Skip cortical thickness (DiReCT), just perform segmentation	
+	-n|--no-cth		Skip cortical thickness (DiReCT)
+	-f|--no-fsr             Skip fast surface reconstruction
+	-g|--no-seg             Skip segmentation
 	-m|--model		Use given trained model
 	-k|--keep		Keep intermediate files
 	-l|--lowmem		Use less memory (use fp16 for ensembling)
@@ -27,7 +29,7 @@ invalid() {
 }
 
 die() {
-	RET=!?
+	RET=$?
 	echo "ERROR (${RET}): $1"
 	if [ ${RET} -eq 137 ] ; then
 		 echo "Likely out-of-memory. Try with '--lowmem' option"
@@ -39,6 +41,8 @@ die() {
 SUBJECT_ID="subj_id"
 DO_SKULLSTRIP=0
 DO_CT=1
+DO_SEG=1
+DO_FSR=1
 KEEP_INTERMEDIATE=0
 LOW_MEM_ARG=""
 MODEL_ARGS=""
@@ -57,6 +61,8 @@ while [[ $# -gt 0 ]]; do
 		-b|--bet)	DO_SKULLSTRIP=1 ;;
 		-i|--mp2rage-inv2)	shift; MP2RAGE_INV2=$1 ;;
 		-n|--no-cth)	DO_CT=0 ;;
+		-f|--no-fsr)    DO_FSR=0 ;;
+		-g|--no-seg)    DO_SEG=0 ;;
 		-m|--model)	shift; MODEL_ARGS="--model $1" ;;
 		-k|--keep)	KEEP_INTERMEDIATE=1 ;;
 		-l|--lowmem)	LOW_MEM_ARG="--lowmem True" ;;
@@ -96,7 +102,6 @@ if [ ${HAS_GPU} != 'True' ] ; then
 	echo "WARNING: No GPU/CUDA device found. Running on CPU might take some time..."
 fi
 
-
 # Skull-stripping
 if [ ${DO_SKULLSTRIP} -gt 0 ] ; then
 	# skull-strip using HD-BET
@@ -123,9 +128,10 @@ fi
 IN_VOLUME_CROP=${DST}/T1w_norm_noskull_cropped.nii.gz
 python ${SCRIPT_DIR}/crop.py "${MASK_VOLUME}" "${IN_VOLUME}" "${IN_VOLUME_CROP}"
 
-
-# DeepScan segmentation
-python ${SCRIPT_DIR}/DeepSCAN_Anatomy_Newnet_apply.py ${LOW_MEM_ARG} ${MODEL_ARGS} "${IN_VOLUME_CROP}" "${DST}" "${SUBJECT_ID}" || die "Segmentation failed"
+if [ ${DO_SEG} -gt 0 ] ; then
+	# DeepScan segmentation
+  	python ${SCRIPT_DIR}/DeepSCAN_Anatomy_Newnet_apply.py ${LOW_MEM_ARG} ${MODEL_ARGS} "${IN_VOLUME_CROP}" "${DST}" "${SUBJECT_ID}" || die "Segmentation failed"
+fi
 
 if [ ${DO_CT} -gt 0 ] ; then
 	# DiReCT
@@ -143,6 +149,11 @@ if [ ${DO_CT} -gt 0 ] ; then
 	FS_ARGS=" ${DST}/T1w_norm_thickmap.nii.gz:colormap=heat"
 fi
 python ${SCRIPT_DIR}/crop.py --revert 1 "${MASK_VOLUME}" "${DST}/softmax_seg.nii.gz" "${DST}/T1w_norm_seg.nii.gz"
+
+if [ ${DO_FSR} -gt 0 ] ; then
+    echo "${MODEL_ARGS}"
+    fast_surface_reconstruction ${SCRIPT_DIR} ${SUBJECT_ID} ${DST} "'$MODEL_ARGS'"
+fi
 
 # cleanup
 if [ ${KEEP_INTERMEDIATE} -eq 0 ] ; then

@@ -74,6 +74,27 @@ def main():
         write_results(thickstd, REGEX_LH, '{}/lh.{}_stats_thicknessstd.txt'.format(args.destination, atlas), '_thicknessstd')
         write_results(thickstd, REGEX_RH, '{}/rh.{}_stats_thicknessstd.txt'.format(args.destination, atlas), '_thicknessstd')
 
+    # Added with the surface reconstruction
+    area, atlas = collect_stats(args.subjects_dir, 'result-SBM-WM-area.csv')
+    if area is not None:
+        write_results(area, REGEX_LH, '{}/lh.{}_stats_area.txt'.format(args.destination, atlas), '_area')
+        write_results(area, REGEX_RH, '{}/rh.{}_stats_area.txt'.format(args.destination, atlas), '_area')
+
+    meancurv, atlas = collect_stats(args.subjects_dir, 'result-SBM-mean-curvature.csv')
+    if meancurv is not None:
+        write_results(meancurv, REGEX_LH, '{}/lh.{}_stats_meancurv.txt'.format(args.destination, atlas), '_meancurv')
+        write_results(meancurv, REGEX_RH, '{}/rh.{}_stats_meancurv.txt'.format(args.destination, atlas), '_meancurv')
+
+    gauscurv, atlas = collect_stats(args.subjects_dir, 'result-SBM-gauss-curvature.csv')
+    if gauscurv is not None:
+        write_results(gauscurv, REGEX_LH, '{}/lh.{}_stats_gauscurv.txt'.format(args.destination, atlas), '_gauscurv')
+        write_results(gauscurv, REGEX_RH, '{}/rh.{}_stats_gauscurv.txt'.format(args.destination, atlas), '_gauscurv')
+
+    contrast, atlas = collect_stats(args.subjects_dir, 'result-SBM-contrast.csv')
+    if contrast is not None:
+        write_results(contrast, REGEX_LH, '{}/lh.{}_stats_pctmean.txt'.format(args.destination, atlas), '')
+        write_results(contrast, REGEX_RH, '{}/rh.{}_stats_pctmean.txt'.format(args.destination, atlas), '')
+
 
 if __name__ == '__main__':
     sys.exit(main())
